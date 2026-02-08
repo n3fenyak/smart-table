@@ -1,106 +1,56 @@
-import './fonts/ys-display/fonts.css'
-import './style.css'
+import { makeIndex } from './lib/utils.js'
 
-import { data as sourceData } from './data/dataset_1.js'
+const BASE_URL = 'https://webinars.webdev.education-services.ru/sp7-api'
 
-import { initData } from './data.js'
-import { processFormData } from './lib/utils.js'
+export function initData(sourceData) {
+  let sellers
+  let customers
+  let lastResult
+  let lastQuery
 
-import { initTable } from './components/table.js'
-import { initPagination } from './components/pagination.js'
-import { initSorting } from './components/sorting.js'
-import { initFiltering } from './components/filtering.js'
-import { initSearching } from './components/searching.js'
-// @todo: подключение
+  const mapRecords = (data) =>
+    data.map((item) => ({
+      id: item.receipt_id,
+      date: item.date,
+      seller: sellers[item.seller_id],
+      customer: customers[item.customer_id],
+      total: item.total_amount,
+    }))
 
-// Исходные данные используемые в render()
-const api = initData(sourceData)
-/**
- * Сбор и обработка полей из таблицы
- * @returns {Object}
- */
-function collectState() {
-  const state = processFormData(new FormData(sampleTable.container))
-  const rowsPerPage = parseInt(state.rowsPerPage) // приведём количество страниц к числу
-  const page = parseInt(state.page ?? 1) // номер страницы по умолчанию 1 и тоже число
+  const getIndexes = async () => {
+    if (!sellers || !customers) {
+      // если индексы ещё не установлены, то делаем запросы
+      ;[sellers, customers] = await Promise.all([
+        // запрашиваем и деструктурируем в уже объявленные ранее переменные
+        fetch(`${BASE_URL}/sellers`).then((res) => res.json()), // запрашиваем продавцов
+        fetch(`${BASE_URL}/customers`).then((res) => res.json()), // запрашиваем покупателей
+      ])
+    }
+    return { sellers, customers }
+  }
 
+  const getRecords = async (query, isUpdated = false) => {
+    const qs = new URLSearchParams(query) // преобразуем объект параметров в SearchParams объект, представляющий query часть url
+    const nextQuery = qs.toString() // и приводим к строковому виду
+
+    if (lastQuery === nextQuery && !isUpdated) {
+      // isUpdated параметр нужен, чтобы иметь возможность делать запрос без кеша
+      return lastResult // если параметры запроса не поменялись, то отдаём сохранённые ранее данные
+    }
+    // если прошлый квери не был ранее установлен или поменялись параметры, то запрашиваем данные с сервера
+    const response = await fetch(`${BASE_URL}/records?${nextQuery}`)
+    const records = await response.json()
+
+    lastQuery = nextQuery // сохраняем для следующих запросов
+    lastResult = {
+      total: records.total,
+      items: mapRecords(records.items),
+    }
+
+    return lastResult
+  }
   return {
-    // расширьте существующий return вот так
-    ...state,
-    rowsPerPage,
-    page,
+    getIndexes,
+    getRecords,
   }
 }
-
-/**
- * Перерисовка состояния таблицы при любых изменениях
- * @param {HTMLButtonElement?} action
- */
-
-async function render(action) {
-  let state = collectState() // состояние полей из таблицы
-  let query = { ...state } // здесь будут формироваться параметры запроса
-  // другие apply*
-
-  query = applySearching(query, state, action)
-  query = applyFiltering(query, state, action)
-  query = applySorting(query, state, action)
-  query = applyPagination(query, state, action) // обновляем query
-
-  const { total, items } = await api.getRecords(query)
-
-  updatePagination(total, query)
-  sampleTable.render(items)
-}
-
-const sampleTable = initTable(
-  {
-    tableTemplate: 'table',
-    rowTemplate: 'row',
-    before: ['search', 'header', 'filter'],
-    after: ['pagination'],
-  },
-  render
-)
-
-// @todo: инициализация
-const applySearching = initSearching('search')
-const { applyFiltering, updateIndexes } = initFiltering(
-  sampleTable.filter.elements
-)
-
-const applySorting = initSorting([
-  // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-  sampleTable.header.elements.sortByDate,
-  sampleTable.header.elements.sortByTotal,
-])
-
-const { applyPagination, updatePagination } = initPagination(
-  sampleTable.pagination.elements, // элементы пагинации из шаблона
-  (el, page, isCurrent) => {
-    // колбэк настройки кнопки страницы
-    const input = el.querySelector('input')
-    const label = el.querySelector('span')
-
-    input.value = page
-    input.checked = isCurrent
-    label.textContent = page
-
-    return el
-  }
-)
-
-const appRoot = document.querySelector('#app')
-appRoot.appendChild(sampleTable.container)
-
-async function init() {
-  const indexes = await api.getIndexes()
-
-  updateIndexes(sampleTable.filter.elements, {
-    searchBySeller: indexes.sellers,
-  })
-}
-// render()
-init().then(render)
-
-// lorem
