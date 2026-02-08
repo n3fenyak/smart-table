@@ -14,8 +14,6 @@ import { initFiltering } from './components/filtering.js'
 import { initSorting } from './components/sorting.js'
 import { initPagination } from './components/pagination.js'
 
-// test
-
 // Исходные данные используемые в render()
 const api = initData(sourceData)
 
@@ -36,10 +34,12 @@ function collectState() {
     page,
   }
 }
+
 /**
  * Перерисовка состояния таблицы при любых изменениях
  * @param {HTMLButtonElement?} action
  */
+
 async function render(action) {
   let state = collectState() // состояние полей из таблицы
   let query = {} // здесь будут формироваться параметры запроса
@@ -69,9 +69,7 @@ const sampleTable = initTable(
 
 // @todo: инициализация
 const applySearching = initSearching('search')
-const { applyFiltering, updateIndexes } = initFiltering(
-  sampleTable.filter.elements
-)
+const { applyFiltering, updateIndexes } = initFiltering(sampleTable.filter)
 
 const applySorting = initSorting([
   // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление

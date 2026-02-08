@@ -1,13 +1,15 @@
-import { makeIndex } from './lib/utils.js'
-
 const BASE_URL = 'https://webinars.webdev.education-services.ru/sp7-api'
 
+import { makeIndex } from './lib/utils.js'
+
 export function initData(sourceData) {
+  // @todo: переменные для кеширования данных
   let sellers
   let customers
   let lastResult
   let lastQuery
 
+  // @todo: функция для приведения строк в тот вид, который нужен нашей таблице
   const mapRecords = (data) =>
     data.map((item) => ({
       id: item.receipt_id,
@@ -17,6 +19,7 @@ export function initData(sourceData) {
       total: item.total_amount,
     }))
 
+  // @todo: функция получения индексов
   const getIndexes = async () => {
     if (!sellers || !customers) {
       // если индексы ещё не установлены, то делаем запросы
@@ -26,9 +29,11 @@ export function initData(sourceData) {
         fetch(`${BASE_URL}/customers`).then((res) => res.json()), // запрашиваем покупателей
       ])
     }
+
     return { sellers, customers }
   }
 
+  // @todo: функция получения записей о продажах с сервера
   const getRecords = async (query, isUpdated = false) => {
     const qs = new URLSearchParams(query) // преобразуем объект параметров в SearchParams объект, представляющий query часть url
     const nextQuery = qs.toString() // и приводим к строковому виду
@@ -37,6 +42,7 @@ export function initData(sourceData) {
       // isUpdated параметр нужен, чтобы иметь возможность делать запрос без кеша
       return lastResult // если параметры запроса не поменялись, то отдаём сохранённые ранее данные
     }
+
     // если прошлый квери не был ранее установлен или поменялись параметры, то запрашиваем данные с сервера
     const response = await fetch(`${BASE_URL}/records?${nextQuery}`)
     const records = await response.json()
@@ -49,6 +55,7 @@ export function initData(sourceData) {
 
     return lastResult
   }
+
   return {
     getIndexes,
     getRecords,

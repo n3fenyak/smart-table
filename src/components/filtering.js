@@ -13,9 +13,10 @@ export function initFiltering(elements) {
   }
 
   const applyFiltering = (query, state, action) => {
+    // @todo: обработка очистки поля
     if (action && action.name === 'clear') {
       const fieldName = action.dataset.field
-      //   const container = action.parentElement
+      // ищем input с нужным name среди всех элементов фильтра
       const input = Object.values(elements).find(
         (el) => el.tagName === 'INPUT' && el.name === fieldName
       )
@@ -23,24 +24,24 @@ export function initFiltering(elements) {
       if (state[fieldName] !== undefined) state[fieldName] = ''
     }
 
-    // @todo: #4.5 — отфильтровать данные, используя компаратор
     const filter = {}
-
     Object.keys(elements).forEach((key) => {
-      if (
-        elements[key] &&
-        ['INPUT', 'SELECT'].includes(elements[key].tagName) &&
-        elements[key].value
-      ) {
-        filter[`filter[${elements[key].name}]`] = elements[key].value
+      if (elements[key]) {
+        if (
+          ['INPUT', 'SELECT'].includes(elements[key].tagName) &&
+          elements[key].value
+        ) {
+          // ищем поля ввода в фильтре с непустыми данными
+          filter[`filter[${elements[key].name}]`] = elements[key].value // чтобы сформировать в query вложенный объект фильтра
+        }
       }
     })
 
-    return Object.keys(filter).length ? Object.assign({}, query, filter) : query
+    return Object.keys(filter).length ? Object.assign({}, query, filter) : query // если в фильтре что-то добавилось, применим к запросу
   }
 
   return {
-    applyFiltering,
     updateIndexes,
+    applyFiltering,
   }
 }
