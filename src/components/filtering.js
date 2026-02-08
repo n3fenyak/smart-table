@@ -14,30 +14,28 @@ export function initFiltering(elements) {
 
   const applyFiltering = (query, state, action) => {
     // @todo: обработка очистки поля
-    if (action && action.name === 'clear') {
-      const fieldName = action.dataset.field
+    if (action && action.name === 'clear' && action.field) {
+      const field = action.field
       // ищем input с нужным name среди всех элементов фильтра
       const input = Object.values(elements).find(
-        (el) => el.tagName === 'INPUT' && el.name === fieldName
+        (el) => ['INPUT', 'SELECT'].includes(el.tagName) && el.name === field
       )
       if (input) input.value = ''
-      if (state[fieldName] !== undefined) state[fieldName] = ''
+      if (state[field] !== undefined) state[field] = ''
     }
 
     const filter = {}
     Object.keys(elements).forEach((key) => {
-      if (elements[key]) {
-        if (
-          ['INPUT', 'SELECT'].includes(elements[key].tagName) &&
-          elements[key].value
-        ) {
-          // ищем поля ввода в фильтре с непустыми данными
-          filter[`filter[${elements[key].name}]`] = elements[key].value // чтобы сформировать в query вложенный объект фильтра
-        }
+      const el = elements[key]
+      if (!el) return
+
+      if (['INPUT', 'SELECT'].includes(el.tagName) && el.value) {
+        state[el.name] = el.value // синхронизируем state с элементами
+        filter[`filter[${el.name}]`] = el.value
       }
     })
 
-    return Object.keys(filter).length ? Object.assign({}, query, filter) : query // если в фильтре что-то добавилось, применим к запросу
+    return Object.keys(filter).length ? { ...query, ...filter } : query
   }
 
   return {
