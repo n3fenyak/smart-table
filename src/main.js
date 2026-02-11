@@ -80,9 +80,8 @@ const applySorting = initSorting([
 ])
 
 const { applyPagination, updatePagination } = initPagination(
-  sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
+  sampleTable.pagination.elements,
   (el, page, isCurrent) => {
-    // и колбэк, чтобы заполнять кнопки страниц данными
     const input = el.querySelector('input')
     const label = el.querySelector('span')
     input.value = page
@@ -99,7 +98,7 @@ async function init() {
   const indexes = await api.getIndexes()
 
   updateIndexes(sampleTable.filter.elements, {
-    searchBySeller: indexes.sellers,
+    seller: indexes.sellers,
   })
 }
 
