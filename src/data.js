@@ -1,6 +1,6 @@
-const BASE_URL = 'https://webinars.webdev.education-services.ru/sp7-api'
-
 import { makeIndex } from './lib/utils.js'
+
+const BASE_URL = 'https://webinars.webdev.education-services.ru/sp7-api'
 
 export function initData(sourceData) {
   // @todo: переменные для кеширования данных
@@ -43,7 +43,7 @@ export function initData(sourceData) {
       return lastResult // если параметры запроса не поменялись, то отдаём сохранённые ранее данные
     }
 
-    // если прошлый квери не был ранее установлен или поменялись параметры, то запрашиваем данные с сервера
+    // если прошлый query не был ранее установлен или поменялись параметры, то запрашиваем данные с сервера
     const response = await fetch(`${BASE_URL}/records?${nextQuery}`)
     const records = await response.json()
 
