@@ -25,16 +25,39 @@ let updateIndexes
 /**
  * Сбор состояния формы
  */
+
 function collectState() {
   const state = processFormData(new FormData(sampleTable.container))
 
-  return {
+  const result = {
     ...state,
-    total: [state.totalFrom, state.totalTo],
     rowsPerPage: parseInt(state.rowsPerPage),
     page: parseInt(state.page ?? 1),
   }
+
+  // добавляем total только если реально есть значения
+  if (state.totalFrom || state.totalTo) {
+    result.total = [state.totalFrom, state.totalTo]
+  }
+
+  return result
 }
+
+// function collectState() {
+//   const state = processFormData(new FormData(sampleTable.container))
+
+//   return {
+//     ...state,
+//     // total: [state.totalFrom, state.totalTo],
+//     rowsPerPage: parseInt(state.rowsPerPage),
+//     page: parseInt(state.page ?? 1),
+//   }
+
+//   if (state.totalFrom || state.totalTo) {
+//     result.total = [state.totalFrom, state.totalTo]
+//   }
+//   return result
+// }
 
 /**
  * Рендер таблицы
