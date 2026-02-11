@@ -1,12 +1,14 @@
 export function initSearching(searchField) {
-  return (query, state, action) => {
-    // result заменили на query
+  console.log('инициализация поиска:', searchField)
+  const applySearching = (query, state, action) => {
+    if (state[searchField] && state[searchField].trim() !== '') {
+      return Object.assign({}, query, {
+        search: state[searchField].trim(),
+      })
+    }
 
-    return state[searchField]
-      ? Object.assign({}, query, {
-          // проверяем, что в поле поиска было что-то введено
-          search: state[searchField], // устанавливаем в query параметр
-        })
-      : query // если поле с поиском пустое, просто возвращаем query без изменений
+    return query
   }
+
+  return applySearching
 }
