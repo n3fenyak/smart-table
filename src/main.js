@@ -29,19 +29,39 @@ let updateIndexes
 function collectState() {
   const state = processFormData(new FormData(sampleTable.container))
 
+  const rowsPerPage = parseInt(state.rowsPerPage) || 10
+  const page = parseInt(state.page) || 1
+
   const result = {
     ...state,
-    rowsPerPage: parseInt(state.rowsPerPage),
-    page: parseInt(state.page ?? 1),
+    rowsPerPage,
+    page,
   }
 
-  // добавляем total только если реально есть значения
+  // Добавляем total ТОЛЬКО если хотя бы одно поле заполнено
   if (state.totalFrom || state.totalTo) {
-    result.total = [state.totalFrom, state.totalTo]
+    result.total = [state.totalFrom || null, state.totalTo || null]
   }
 
   return result
 }
+
+// function collectState() {
+//   const state = processFormData(new FormData(sampleTable.container))
+
+//   const result = {
+//     ...state,
+//     rowsPerPage: parseInt(state.rowsPerPage),
+//     page: parseInt(state.page ?? 1),
+//   }
+
+//   // добавляем total только если реально есть значения
+//   if (state.totalFrom || state.totalTo) {
+//     result.total = [state.totalFrom, state.totalTo]
+//   }
+
+//   return result
+// }
 
 // function collectState() {
 //   const state = processFormData(new FormData(sampleTable.container))
