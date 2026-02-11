@@ -137,41 +137,12 @@ applySorting = initSorting([
 applySearching = initSearching('search')
 
 // Начальная загрузка
-async function render(action) {
-  const state = collectState()
-  let query = {}
+async function init() {
+  const indexes = await api.getIndexes()
 
-  if (applySearching) {
-    query = applySearching(query, state, action)
-  }
-
-  if (applyFiltering) {
-    query = applyFiltering(query, state, action)
-  }
-
-  if (applySorting) {
-    query = applySorting(query, state, action)
-  }
-
-  if (applyPagination) {
-    query = applyPagination(query, state, action)
-  }
-
-  const { total, items } = await api.getRecords(query)
-
-  if (updatePagination) {
-    updatePagination(total, query)
-  }
-
-  sampleTable.render(items)
+  updateIndexes({
+    searchBySeller: indexes.sellers,
+  })
 }
-
-// async function init() {
-//   const indexes = await api.getIndexes()
-
-//   updateIndexes({
-//     searchBySeller: indexes.sellers,
-//   })
-// }
 
 init().then(render)
